@@ -1,0 +1,21 @@
+[gd_scene load_steps=5 format=3 uid="uid://c44qyru8obld0"]
+
+[ext_resource type="Texture2D" uid="uid://cc3v0xh3ftjrw" path="res://Assets/Spritesheet.png" id="1_yrlrx"]
+[ext_resource type="Script" uid="uid://boixlj4gwjso4" path="res://Scripts/circle_button.gd" id="2_sayey"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sayey"]
+atlas = ExtResource("1_yrlrx")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k8p0t"]
+atlas = ExtResource("1_yrlrx")
+region = Rect2(32, 0, 32, 32)
+
+[node name="TextureButton" type="TextureButton"]
+texture_filter = 1
+offset_right = 32.0
+offset_bottom = 32.0
+toggle_mode = true
+texture_normal = SubResource("AtlasTexture_sayey")
+texture_pressed = SubResource("AtlasTexture_k8p0t")
+script = ExtResource("2_sayey")

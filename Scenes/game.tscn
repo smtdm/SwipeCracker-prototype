@@ -1,0 +1,65 @@
+[gd_scene load_steps=7 format=3 uid="uid://daxfaf06phx7w"]
+
+[ext_resource type="Script" uid="uid://ueor8a81eye" path="res://Scripts/game.gd" id="1_wrm1d"]
+[ext_resource type="FontFile" uid="uid://8ywg0m1q2an6" path="res://Assets/PixelOperator8.ttf" id="2_qxrlw"]
+[ext_resource type="Script" uid="uid://b4j0crumi284n" path="res://Scripts/game_manager.gd" id="2_wowpa"]
+[ext_resource type="FontFile" uid="uid://d1g8lhp7c2jsa" path="res://Assets/PixelOperator8-Bold.ttf" id="4_i6g32"]
+[ext_resource type="Script" uid="uid://dviejwvvxixd0" path="res://Scripts/check_button.gd" id="5_1l0tm"]
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_2poj3"]
+
+[node name="Game" type="Node2D"]
+script = ExtResource("1_wrm1d")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+offset_right = 531.0
+offset_bottom = 486.0
+texture = SubResource("CanvasTexture_2poj3")
+
+[node name="Circle_buttons" type="Node" parent="."]
+
+[node name="Vertical_connectors" type="Node" parent="."]
+
+[node name="Horizontal_connectors" type="Node" parent="."]
+
+[node name="GameManager" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("2_wowpa")
+
+[node name="CorrectEdgesLabel" type="Label" parent="GameManager"]
+offset_left = 47.0
+offset_top = 453.0
+offset_right = 531.0
+offset_bottom = 485.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_qxrlw")
+theme_override_font_sizes/font_size = 24
+text = "Correct Edges: X"
+horizontal_alignment = 2
+
+[node name="CorrectNodesLabel" type="Label" parent="GameManager"]
+offset_left = 119.0
+offset_top = 424.0
+offset_right = 531.0
+offset_bottom = 456.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_qxrlw")
+theme_override_font_sizes/font_size = 24
+text = "Correct Nodes: X"
+horizontal_alignment = 2
+
+[node name="PlacedEdgesLabel" type="Label" parent="GameManager"]
+offset_left = 47.0
+offset_top = 453.0
+offset_right = 87.0
+offset_bottom = 476.0
+
+[node name="CheckButton" type="Button" parent="."]
+offset_left = 1.0
+offset_top = 436.0
+offset_right = 89.0
+offset_bottom = 460.0
+theme_override_fonts/font = ExtResource("4_i6g32")
+theme_override_font_sizes/font_size = 24
+text = "Check"
+script = ExtResource("5_1l0tm")
