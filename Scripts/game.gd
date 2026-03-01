@@ -39,21 +39,29 @@ func _process(delta: float) -> void:
 
 
 func load_game():
-	for x_pos in range(WIDTH*2-1):
-		for y_pos in range(HEIGHT*2-1):
-			if (x_pos%2==0 and y_pos%2==0):
-				generate_circle_button(x_pos, y_pos)
-			elif (x_pos%2==1 and y_pos%2==0):
-				generate_horizontal_connector(x_pos,y_pos)
-			elif (x_pos%2==0 and y_pos%2==1):
-				generate_vertical_connector(x_pos,y_pos)
+	for x_pos in range(WIDTH):
+		for y_pos in range(HEIGHT):
+			generate_circle_button(x_pos, y_pos)
+			if x_pos<WIDTH-1:
+				generate_horizontal_connector(Vector2(x_pos,y_pos),Vector2(x_pos+1,y_pos))
+			if y_pos<HEIGHT-1:
+				generate_vertical_connector(Vector2(x_pos,y_pos),Vector2(x_pos,y_pos+1))
+	#for x_pos in range(WIDTH*2-1):
+		#for y_pos in range(HEIGHT*2-1):
+			#if (x_pos%2==0 and y_pos%2==0):
+				#generate_circle_button(x_pos, y_pos)
+			#elif (x_pos%2==1 and y_pos%2==0):
+				#generate_horizontal_connector(x_pos,y_pos)
+			#elif (x_pos%2==0 and y_pos%2==1):
+				#generate_vertical_connector(x_pos,y_pos)
 	game_manager.update_label("edges", 0)
 	game_manager.update_label("nodes", 0)
 	generate_random_graph()
 	
+
 func generate_circle_button(x_pos, y_pos):
 	var circle_button = circle_button.instantiate()
-	circle_button.position = Vector2(x_pos*32, y_pos*32)
+	circle_button.position = Vector2(x_pos*64, y_pos*64)
 	circle_button.x_pos = int(x_pos)
 	circle_button.y_pos = int(y_pos)
 	circle_button.name = str("Circle_button",x_pos,",",y_pos)
@@ -61,25 +69,25 @@ func generate_circle_button(x_pos, y_pos):
 	circle_buttons_node.add_child(circle_button)
 	return circle_button
 	
-func generate_horizontal_connector(x_pos, y_pos):
+func generate_horizontal_connector(pos_start,pos_end):
 	var horizontal_connector = horizontal_connector.instantiate()
-	horizontal_connector.position = Vector2(x_pos*32, y_pos*32)
-	horizontal_connector.x_pos = int(x_pos)
-	horizontal_connector.y_pos = int(y_pos)
-	horizontal_connector.name = str("Horizontal_connector",x_pos,",",y_pos)
+	horizontal_connector.position = Vector2(pos_start[0]*64+32, pos_start[1]*64)
+	horizontal_connector.pos_start = pos_start
+	horizontal_connector.pos_end = pos_end
+	horizontal_connector.name = str("Horizontal_connector",pos_start,"to",pos_end)
 	horizontal_connectors_node.add_child(horizontal_connector)
 	return horizontal_connector
 		
-func generate_vertical_connector(x_pos, y_pos):
+func generate_vertical_connector(pos_start,pos_end):
 	var vertical_connector = vertical_connector.instantiate()
-	vertical_connector.position = Vector2(x_pos*32, y_pos*32)
-	vertical_connector.x_pos = int(x_pos)
-	vertical_connector.y_pos = int(y_pos)
-	vertical_connector.name = str("Vertical_connector",x_pos,",",y_pos)
+	vertical_connector.position = Vector2(pos_start[0]*64, pos_start[1]*64+32)
+	vertical_connector.pos_start = pos_start
+	vertical_connector.pos_end = pos_end
+	vertical_connector.name = str("Vertical_connector",pos_start,"to",pos_end)
 	vertical_connectors_node.add_child(vertical_connector)
 	return vertical_connector
 
-func generate_random_graph():
+func generate_random_graph(): # TODO Change to new coordiate system
 	# at the moment it is static and always the same
 	for x_pos in range(WIDTH*2-1):
 		for y_pos in range(HEIGHT*2-1):
@@ -127,26 +135,34 @@ func _on_circle_button_pressed(x_pos, y_pos):
 		# -> make connection
 		var min_x = int(min(last_pressed[0],now_pressed[0]))
 		var min_y = int(min(last_pressed[1],now_pressed[1]))
-		if abs(last_pressed - now_pressed) == Vector2(0,2):
+		
+		var nodes_pressed_array = Array()
+		nodes_pressed_array.append(now_pressed)
+		nodes_pressed_array.append(last_pressed)
+		nodes_pressed_array.sort()
+		
+		if abs(last_pressed - now_pressed) == Vector2(0,1):
 			# vertical pressed
-			var current_connector = vertical_connectors_node.get_node(str("Vertical_connector",min_x,",",min_y+1))
+			var current_connector = vertical_connectors_node.get_node(str("Vertical_connector",nodes_pressed_array[0],"to",nodes_pressed_array[1]).replace(".","_"))
 			current_connector.disabled = false
-			if !connected_vertical_edges.has(Vector2(current_connector.x_pos,current_connector.y_pos)):
-				connected_vertical_edges.append(Vector2(current_connector.x_pos,current_connector.y_pos))
-				connected_nodes.append(Vector2(current_connector.x_pos,current_connector.y_pos-1))
-				connected_nodes.append(Vector2(current_connector.x_pos,current_connector.y_pos+1))
+			if !connected_vertical_edges.has(nodes_pressed_array):
+				connected_vertical_edges.append(nodes_pressed_array)
+				connected_nodes.append(now_pressed)
+				connected_nodes.append(last_pressed)
 			deselect_button.emit()
 			last_pressed = Vector2(-1,-1)
-		if abs(last_pressed - now_pressed) == Vector2(2,0):
+		if abs(last_pressed - now_pressed) == Vector2(1,0):
 			# horizontal pressed
-			var current_connector = horizontal_connectors_node.get_node(str("Horizontal_connector",min_x+1,",",min_y))
+			var current_connector = horizontal_connectors_node.get_node(str("Horizontal_connector",nodes_pressed_array[0],"to",nodes_pressed_array[1]).replace(".","_"))
 			current_connector.disabled = false
-			if !connected_horizontal_edges.has(Vector2(current_connector.x_pos,current_connector.y_pos)):
-				connected_horizontal_edges.append(Vector2(current_connector.x_pos,current_connector.y_pos))
-				connected_nodes.append(Vector2(current_connector.x_pos-1,current_connector.y_pos))
-				connected_nodes.append(Vector2(current_connector.x_pos+1,current_connector.y_pos))
+			# check if connection is in the array, else add it and its nodes to the connected arrays
+			if !connected_horizontal_edges.has(nodes_pressed_array):
+				connected_horizontal_edges.append(nodes_pressed_array)
+				connected_nodes.append(now_pressed)
+				connected_nodes.append(last_pressed)
 			deselect_button.emit()
 			last_pressed = Vector2(-1,-1)
+			
 		#TODO diagonal and slanted
 		else:
 			deselect_button.emit()
@@ -157,15 +173,19 @@ func _on_circle_button_pressed(x_pos, y_pos):
 	print("horizontal edges: ",connected_horizontal_edges)
 	pass
 		
-func _on_connector_button_pressed(x_pos, y_pos):
-	if connected_horizontal_edges.has(Vector2(x_pos,y_pos)):
-		connected_horizontal_edges.erase(Vector2(x_pos,y_pos))
-		connected_nodes.erase(Vector2(x_pos-1,y_pos))
-		connected_nodes.erase(Vector2(x_pos+1,y_pos))
-	if connected_vertical_edges.has(Vector2(x_pos,y_pos)):
-		connected_vertical_edges.erase(Vector2(x_pos,y_pos))
-		connected_nodes.erase(Vector2(x_pos,y_pos-1))
-		connected_nodes.erase(Vector2(x_pos,y_pos+1))	
+func _on_connector_button_pressed(pos_start, pos_end):
+	var nodes_connected_arr = Array()
+	nodes_connected_arr.append(pos_start)
+	nodes_connected_arr.append(pos_end)
+	
+	if connected_horizontal_edges.has(nodes_connected_arr):
+		connected_horizontal_edges.erase(nodes_connected_arr)
+		connected_nodes.erase(pos_start)
+		connected_nodes.erase(pos_end)
+	if connected_vertical_edges.has(nodes_connected_arr):
+		connected_vertical_edges.erase(nodes_connected_arr)
+		connected_nodes.erase(pos_start)
+		connected_nodes.erase(pos_end)
 
 func _on_check_button_pressed():
 	var correct_edges = check_connectors()

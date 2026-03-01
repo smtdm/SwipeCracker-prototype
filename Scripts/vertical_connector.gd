@@ -2,10 +2,15 @@ extends TextureButton
 
 @onready var game = get_tree().get_root().get_node("Game")
 
-var x_pos: int
-var y_pos: int
+var pos_start: Vector2
+var pos_end: Vector2
 
-signal connector_button_pressed(x_pos, y_pos)
+var x_pos_start = pos_start[0]
+var y_pos_start = pos_start[1]
+var x_pos_end = pos_end[0]
+var y_pos_end = pos_end[1]
+
+signal connector_button_pressed(pos_start, pos_end)
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -21,5 +26,5 @@ func _process(delta: float) -> void:
 
 func _pressed() -> void:
 
-	connector_button_pressed.emit(x_pos, y_pos)
+	connector_button_pressed.emit(pos_start, pos_end)
 	disabled = true
