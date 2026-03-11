@@ -96,6 +96,7 @@ func generate_random_graph(): # TODO Change to new coordiate system
 	while randf() > WEIGHT:
 		current_connection.clear()
 		
+		#Add new edge
 		match directions[rng.rand_weighted(directions_weights)]:
 			"left":
 				if (current_x-1)<0:
@@ -107,8 +108,7 @@ func generate_random_graph(): # TODO Change to new coordiate system
 					if !correct_horizontal_edges.has(current_connection):
 						correct_horizontal_edges.append([current_connection[0],current_connection[1]])
 						current_x -= 1
-					else:
-						continue
+
 			"right":
 				if (current_x+1)>WIDTH-1:
 					continue
@@ -119,8 +119,7 @@ func generate_random_graph(): # TODO Change to new coordiate system
 					if !correct_horizontal_edges.has(current_connection):
 						correct_horizontal_edges.append([current_connection[0],current_connection[1]])
 						current_x += 1
-					else:
-						continue
+
 			"up":
 				if (current_y-1)<0:
 					continue
@@ -131,8 +130,7 @@ func generate_random_graph(): # TODO Change to new coordiate system
 					if !correct_vertical_edges.has(current_connection):
 						correct_vertical_edges.append([current_connection[0],current_connection[1]])
 						current_y -= 1
-					else:
-						continue
+
 			"down":
 				if (current_y+1)>HEIGHT-1:
 					continue
@@ -143,25 +141,17 @@ func generate_random_graph(): # TODO Change to new coordiate system
 					if !correct_vertical_edges.has(current_connection):
 						correct_vertical_edges.append([current_connection[0],current_connection[1]])
 						current_y += 1
-					else:
-						continue		
-	print("correct horizontal edges: ", correct_horizontal_edges)
-	print("correct vertical edges: ", correct_vertical_edges)
+		
+		# generate correct nodes array
+		if !correct_nodes.has(current_connection[0]):
+			correct_nodes.append(current_connection[0])
+		if !correct_nodes.has(current_connection[1]):
+			correct_nodes.append(current_connection[1])
+		
 	correct_horizontal_edges.sort()
 	correct_vertical_edges.sort()
-	
-	##generate correct nodes array
-	#for i_vertical in correct_vertical_edges:
-		#if !correct_nodes.has(Vector2(i_vertical[0],i_vertical[1]-1)):
-			#correct_nodes.append(Vector2(i_vertical[0],i_vertical[1]-1))
-		#if !correct_nodes.has(Vector2(i_vertical[0],i_vertical[1]+1)):
-			#correct_nodes.append(Vector2(i_vertical[0],i_vertical[1]+1))
-	#for i_horizontal in correct_horizontal_edges:
-		#if !correct_nodes.has(Vector2(i_horizontal[0]-1,i_horizontal[1])):
-			#correct_nodes.append(Vector2(i_horizontal[0]-1,i_horizontal[1]))
-		#if !correct_nodes.has(Vector2(i_horizontal[0]+1,i_horizontal[1])):
-			#correct_nodes.append(Vector2(i_horizontal[0]+1,i_horizontal[1]))
-	#correct_nodes.sort()
+	correct_nodes.sort()
+
 	print("verticals: ", correct_vertical_edges)
 	print("horizontals: ", correct_horizontal_edges)
 	print("nodes: ", correct_nodes)
