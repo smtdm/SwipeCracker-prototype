@@ -17,7 +17,7 @@ const WIDTH: int = 3
 const HEIGHT: int = 3
 const WEIGHT: float = 0.05 # determines the chance an edge will be generated
 
-var last_pressed = Vector2(-1,-1)
+var last_pressed = Vector2i(-1,-1)
 
 var connected_vertical_edges = Array()
 var connected_horizontal_edges = Array()
@@ -43,9 +43,9 @@ func load_game():
 		for y_pos in range(HEIGHT):
 			generate_circle_button(x_pos, y_pos)
 			if x_pos<WIDTH-1:
-				generate_horizontal_connector(Vector2(x_pos,y_pos),Vector2(x_pos+1,y_pos))
+				generate_horizontal_connector(Vector2i(x_pos,y_pos),Vector2i(x_pos+1,y_pos))
 			if y_pos<HEIGHT-1:
-				generate_vertical_connector(Vector2(x_pos,y_pos),Vector2(x_pos,y_pos+1))
+				generate_vertical_connector(Vector2i(x_pos,y_pos),Vector2i(x_pos,y_pos+1))
 	game_manager.update_label("edges", 0)
 	game_manager.update_label("nodes", 0)
 	generate_random_graph()
@@ -101,11 +101,11 @@ func generate_random_graph(): # TODO Change to new coordiate system
 				if (current_x-1)<0:
 					continue
 				else:
-					current_connection.append(Vector2(current_x, current_y))
-					current_connection.append(Vector2(current_x-1, current_y))
-					current_connection.sort()
+					current_connection.append(Vector2i(current_x-1, current_y))
+					current_connection.append(Vector2i(current_x, current_y))
+					#current_connection.sort()
 					if !correct_horizontal_edges.has(current_connection):
-						correct_horizontal_edges.append([current_connection[0], current_connection[1]])
+						correct_horizontal_edges.append([current_connection[0],current_connection[1]])
 						current_x -= 1
 					else:
 						continue
@@ -113,11 +113,11 @@ func generate_random_graph(): # TODO Change to new coordiate system
 				if (current_x+1)>WIDTH-1:
 					continue
 				else:
-					current_connection.append(Vector2(current_x, current_y))
-					current_connection.append(Vector2(current_x+1, current_y))
-					current_connection.sort()
+					current_connection.append(Vector2i(current_x, current_y))
+					current_connection.append(Vector2i(current_x+1, current_y))
+					#current_connection.sort()
 					if !correct_horizontal_edges.has(current_connection):
-						correct_horizontal_edges.append(current_connection)
+						correct_horizontal_edges.append([current_connection[0],current_connection[1]])
 						current_x += 1
 					else:
 						continue
@@ -125,11 +125,11 @@ func generate_random_graph(): # TODO Change to new coordiate system
 				if (current_y-1)<0:
 					continue
 				else:
-					current_connection.append(Vector2(current_x, current_y))
-					current_connection.append(Vector2(current_x, current_y-1))
-					current_connection.sort()
+					current_connection.append(Vector2i(current_x, current_y-1))
+					current_connection.append(Vector2i(current_x, current_y))
+					#current_connection.sort()
 					if !correct_vertical_edges.has(current_connection):
-						correct_vertical_edges.append(current_connection)
+						correct_vertical_edges.append([current_connection[0],current_connection[1]])
 						current_y -= 1
 					else:
 						continue
@@ -137,11 +137,11 @@ func generate_random_graph(): # TODO Change to new coordiate system
 				if (current_y+1)>HEIGHT-1:
 					continue
 				else:
-					current_connection.append(Vector2(current_x, current_y))
-					current_connection.append(Vector2(current_x, current_y+1))
-					current_connection.sort()
+					current_connection.append(Vector2i(current_x, current_y))
+					current_connection.append(Vector2i(current_x, current_y+1))
+					#current_connection.sort()
 					if !correct_vertical_edges.has(current_connection):
-						correct_vertical_edges.append(current_connection)
+						correct_vertical_edges.append([current_connection[0],current_connection[1]])
 						current_y += 1
 					else:
 						continue		
@@ -167,13 +167,13 @@ func generate_random_graph(): # TODO Change to new coordiate system
 	print("nodes: ", correct_nodes)
 	
 func _on_circle_button_pressed(x_pos, y_pos):
-	var now_pressed = Vector2(x_pos,y_pos)
+	var now_pressed = Vector2i(x_pos,y_pos)
 	
 	if now_pressed == last_pressed:
 		# same button is clicked -> disable selection
-		last_pressed = Vector2(-1,-1)
+		last_pressed = Vector2i(-1,-1)
 		# NOG IETS NODIG?
-	elif last_pressed == Vector2(-1,-1):
+	elif last_pressed == Vector2i(-1,-1):
 		# no button pressed yet -> set button as first one
 		last_pressed = now_pressed
 	else:
@@ -187,7 +187,7 @@ func _on_circle_button_pressed(x_pos, y_pos):
 		nodes_pressed_array.append(last_pressed)
 		nodes_pressed_array.sort()
 		
-		if abs(last_pressed - now_pressed) == Vector2(0,1):
+		if abs(last_pressed - now_pressed) == Vector2i(0,1):
 			# vertical pressed
 			var current_connector = vertical_connectors_node.get_node(str("Vertical_connector",nodes_pressed_array[0],"to",nodes_pressed_array[1]).replace(".","_"))
 			current_connector.disabled = false
@@ -196,8 +196,8 @@ func _on_circle_button_pressed(x_pos, y_pos):
 				connected_nodes.append(now_pressed)
 				connected_nodes.append(last_pressed)
 			deselect_button.emit()
-			last_pressed = Vector2(-1,-1)
-		if abs(last_pressed - now_pressed) == Vector2(1,0):
+			last_pressed = Vector2i(-1,-1)
+		if abs(last_pressed - now_pressed) == Vector2i(1,0):
 			# horizontal pressed
 			var current_connector = horizontal_connectors_node.get_node(str("Horizontal_connector",nodes_pressed_array[0],"to",nodes_pressed_array[1]).replace(".","_"))
 			current_connector.disabled = false
@@ -207,13 +207,13 @@ func _on_circle_button_pressed(x_pos, y_pos):
 				connected_nodes.append(now_pressed)
 				connected_nodes.append(last_pressed)
 			deselect_button.emit()
-			last_pressed = Vector2(-1,-1)
+			last_pressed = Vector2i(-1,-1)
 			
 		#TODO diagonal and slanted
 		
 		else:
 			deselect_button.emit()
-			last_pressed = Vector2(-1,-1)
+			last_pressed = Vector2i(-1,-1)
 		pass
 	print(x_pos,", ", y_pos)
 	print("vertical edges: ",connected_vertical_edges)

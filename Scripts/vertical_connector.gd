@@ -2,8 +2,8 @@ extends TextureButton
 
 @onready var game = get_tree().get_root().get_node("Game")
 
-var pos_start: Vector2
-var pos_end: Vector2
+var pos_start: Vector2i
+var pos_end: Vector2i
 
 var x_pos_start = pos_start[0]
 var y_pos_start = pos_start[1]
