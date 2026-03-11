@@ -15,7 +15,7 @@ signal deselect_button
 
 const WIDTH: int = 3
 const HEIGHT: int = 3
-const WEIGHT: float = 5.0 # determines the chance an edge will be generated
+const WEIGHT: float = 0.05 # determines the chance an edge will be generated
 
 var last_pressed = Vector2(-1,-1)
 
@@ -46,14 +46,6 @@ func load_game():
 				generate_horizontal_connector(Vector2(x_pos,y_pos),Vector2(x_pos+1,y_pos))
 			if y_pos<HEIGHT-1:
 				generate_vertical_connector(Vector2(x_pos,y_pos),Vector2(x_pos,y_pos+1))
-	#for x_pos in range(WIDTH*2-1):
-		#for y_pos in range(HEIGHT*2-1):
-			#if (x_pos%2==0 and y_pos%2==0):
-				#generate_circle_button(x_pos, y_pos)
-			#elif (x_pos%2==1 and y_pos%2==0):
-				#generate_horizontal_connector(x_pos,y_pos)
-			#elif (x_pos%2==0 and y_pos%2==1):
-				#generate_vertical_connector(x_pos,y_pos)
 	game_manager.update_label("edges", 0)
 	game_manager.update_label("nodes", 0)
 	generate_random_graph()
@@ -88,34 +80,88 @@ func generate_vertical_connector(pos_start,pos_end):
 	return vertical_connector
 
 func generate_random_graph(): # TODO Change to new coordiate system
-	# at the moment it is static and always the same
-	for x_pos in range(WIDTH*2-1):
-		for y_pos in range(HEIGHT*2-1):
-			if (x_pos%2==0 and y_pos%2==0):
-				# node, do nothing
-				continue
-			elif (x_pos%2==1 and y_pos%2==0):
-				if randfn(0.0,WEIGHT) < 1.0:
-					correct_horizontal_edges.append(Vector2(x_pos,y_pos))
-			elif (x_pos%2==0 and y_pos%2==1):
-				if randfn(0.0,WEIGHT) < 1.0:
-					correct_vertical_edges.append(Vector2(x_pos,y_pos))
-
+	var rng = RandomNumberGenerator.new()
+	var directions = ["left", "right", "up", "down"]
+	var directions_weights = PackedFloat32Array([1, 1, 1, 1 ])
+	
+	var x_start_point = randi_range(0,WIDTH-1)
+	var y_start_point = randi_range(0,HEIGHT-1)
+	print("start point: ", x_start_point, "; ", y_start_point)
+	
+	var current_x = x_start_point
+	var current_y = y_start_point
+	
+	var current_connection = Array()
+	
+	while randf() > WEIGHT:
+		current_connection.clear()
+		
+		match directions[rng.rand_weighted(directions_weights)]:
+			"left":
+				if (current_x-1)<0:
+					continue
+				else:
+					current_connection.append(Vector2(current_x, current_y))
+					current_connection.append(Vector2(current_x-1, current_y))
+					current_connection.sort()
+					if !correct_horizontal_edges.has(current_connection):
+						correct_horizontal_edges.append([current_connection[0], current_connection[1]])
+						current_x -= 1
+					else:
+						continue
+			"right":
+				if (current_x+1)>WIDTH-1:
+					continue
+				else:
+					current_connection.append(Vector2(current_x, current_y))
+					current_connection.append(Vector2(current_x+1, current_y))
+					current_connection.sort()
+					if !correct_horizontal_edges.has(current_connection):
+						correct_horizontal_edges.append(current_connection)
+						current_x += 1
+					else:
+						continue
+			"up":
+				if (current_y-1)<0:
+					continue
+				else:
+					current_connection.append(Vector2(current_x, current_y))
+					current_connection.append(Vector2(current_x, current_y-1))
+					current_connection.sort()
+					if !correct_vertical_edges.has(current_connection):
+						correct_vertical_edges.append(current_connection)
+						current_y -= 1
+					else:
+						continue
+			"down":
+				if (current_y+1)>HEIGHT-1:
+					continue
+				else:
+					current_connection.append(Vector2(current_x, current_y))
+					current_connection.append(Vector2(current_x, current_y+1))
+					current_connection.sort()
+					if !correct_vertical_edges.has(current_connection):
+						correct_vertical_edges.append(current_connection)
+						current_y += 1
+					else:
+						continue		
+	print("correct horizontal edges: ", correct_horizontal_edges)
+	print("correct vertical edges: ", correct_vertical_edges)
 	correct_horizontal_edges.sort()
 	correct_vertical_edges.sort()
 	
-	#generate correct nodes array
-	for i_vertical in correct_vertical_edges:
-		if !correct_nodes.has(Vector2(i_vertical[0],i_vertical[1]-1)):
-			correct_nodes.append(Vector2(i_vertical[0],i_vertical[1]-1))
-		if !correct_nodes.has(Vector2(i_vertical[0],i_vertical[1]+1)):
-			correct_nodes.append(Vector2(i_vertical[0],i_vertical[1]+1))
-	for i_horizontal in correct_horizontal_edges:
-		if !correct_nodes.has(Vector2(i_horizontal[0]-1,i_horizontal[1])):
-			correct_nodes.append(Vector2(i_horizontal[0]-1,i_horizontal[1]))
-		if !correct_nodes.has(Vector2(i_horizontal[0]+1,i_horizontal[1])):
-			correct_nodes.append(Vector2(i_horizontal[0]+1,i_horizontal[1]))
-	correct_nodes.sort()
+	##generate correct nodes array
+	#for i_vertical in correct_vertical_edges:
+		#if !correct_nodes.has(Vector2(i_vertical[0],i_vertical[1]-1)):
+			#correct_nodes.append(Vector2(i_vertical[0],i_vertical[1]-1))
+		#if !correct_nodes.has(Vector2(i_vertical[0],i_vertical[1]+1)):
+			#correct_nodes.append(Vector2(i_vertical[0],i_vertical[1]+1))
+	#for i_horizontal in correct_horizontal_edges:
+		#if !correct_nodes.has(Vector2(i_horizontal[0]-1,i_horizontal[1])):
+			#correct_nodes.append(Vector2(i_horizontal[0]-1,i_horizontal[1]))
+		#if !correct_nodes.has(Vector2(i_horizontal[0]+1,i_horizontal[1])):
+			#correct_nodes.append(Vector2(i_horizontal[0]+1,i_horizontal[1]))
+	#correct_nodes.sort()
 	print("verticals: ", correct_vertical_edges)
 	print("horizontals: ", correct_horizontal_edges)
 	print("nodes: ", correct_nodes)
@@ -164,6 +210,7 @@ func _on_circle_button_pressed(x_pos, y_pos):
 			last_pressed = Vector2(-1,-1)
 			
 		#TODO diagonal and slanted
+		
 		else:
 			deselect_button.emit()
 			last_pressed = Vector2(-1,-1)
