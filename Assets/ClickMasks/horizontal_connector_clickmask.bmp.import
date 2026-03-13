@@ -1,0 +1,16 @@
+[remap]
+
+importer="bitmap"
+type="BitMap"
+uid="uid://dpkm37an25s7t"
+path="res://.godot/imported/horizontal_connector_clickmask.bmp-8bcd338125dc1e794b7b9eccd9b8e277.res"
+
+[deps]
+
+source_file="res://Assets/ClickMasks/horizontal_connector_clickmask.bmp"
+dest_files=["res://.godot/imported/horizontal_connector_clickmask.bmp-8bcd338125dc1e794b7b9eccd9b8e277.res"]
+
+[params]
+
+create_from=0
+threshold=0.5

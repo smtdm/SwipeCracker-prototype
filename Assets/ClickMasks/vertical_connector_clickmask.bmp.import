@@ -1,0 +1,16 @@
+[remap]
+
+importer="bitmap"
+type="BitMap"
+uid="uid://b72p3ipiawsea"
+path="res://.godot/imported/vertical_connector_clickmask.bmp-b6ae847a3f4e6427d54dac5f1c1b34f5.res"
+
+[deps]
+
+source_file="res://Assets/ClickMasks/vertical_connector_clickmask.bmp"
+dest_files=["res://.godot/imported/vertical_connector_clickmask.bmp-b6ae847a3f4e6427d54dac5f1c1b34f5.res"]
+
+[params]
+
+create_from=0
+threshold=0.5

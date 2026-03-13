@@ -1,0 +1,16 @@
+[remap]
+
+importer="bitmap"
+type="BitMap"
+uid="uid://bv81gdm620qpm"
+path="res://.godot/imported/diagonal_down_clickmask.bmp-ce9b1f2751c4e56128fe642607f710ed.res"
+
+[deps]
+
+source_file="res://Assets/ClickMasks/diagonal_down_clickmask.bmp"
+dest_files=["res://.godot/imported/diagonal_down_clickmask.bmp-ce9b1f2751c4e56128fe642607f710ed.res"]
+
+[params]
+
+create_from=0
+threshold=0.5
