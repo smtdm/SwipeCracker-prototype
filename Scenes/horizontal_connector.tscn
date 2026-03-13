@@ -1,6 +1,7 @@
-[gd_scene load_steps=6 format=3 uid="uid://dd464lqe5p3v3"]
+[gd_scene load_steps=7 format=3 uid="uid://dd464lqe5p3v3"]
 
 [ext_resource type="Texture2D" uid="uid://cc3v0xh3ftjrw" path="res://Assets/Spritesheet.png" id="1_x6efo"]
+[ext_resource type="BitMap" uid="uid://dpkm37an25s7t" path="res://Assets/ClickMasks/horizontal_connector_clickmask.bmp" id="2_0uuow"]
 [ext_resource type="Script" uid="uid://1hbxet3hc4g5" path="res://Scripts/horizontal_connector.gd" id="2_pdw22"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_x6efo"]
@@ -20,4 +21,5 @@ offset_bottom = 32.0
 texture_normal = SubResource("AtlasTexture_x6efo")
 texture_pressed = SubResource("AtlasTexture_pdw22")
 texture_disabled = SubResource("AtlasTexture_0uuow")
+texture_click_mask = ExtResource("2_0uuow")
 script = ExtResource("2_pdw22")

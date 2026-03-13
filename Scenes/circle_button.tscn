@@ -1,6 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://c44qyru8obld0"]
+[gd_scene load_steps=6 format=3 uid="uid://c44qyru8obld0"]
 
 [ext_resource type="Texture2D" uid="uid://cc3v0xh3ftjrw" path="res://Assets/Spritesheet.png" id="1_yrlrx"]
+[ext_resource type="BitMap" uid="uid://bpeodmjvaoh66" path="res://Assets/ClickMasks/round_button_clickmask.bmp" id="2_k8p0t"]
 [ext_resource type="Script" uid="uid://boixlj4gwjso4" path="res://Scripts/circle_button.gd" id="2_sayey"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_sayey"]
@@ -12,10 +13,12 @@ atlas = ExtResource("1_yrlrx")
 region = Rect2(32, 0, 32, 32)
 
 [node name="TextureButton" type="TextureButton"]
+z_index = 3
 texture_filter = 1
 offset_right = 32.0
 offset_bottom = 32.0
 toggle_mode = true
 texture_normal = SubResource("AtlasTexture_sayey")
 texture_pressed = SubResource("AtlasTexture_k8p0t")
+texture_click_mask = ExtResource("2_k8p0t")
 script = ExtResource("2_sayey")

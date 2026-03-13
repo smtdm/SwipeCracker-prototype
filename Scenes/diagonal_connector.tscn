@@ -1,0 +1,25 @@
+[gd_scene load_steps=7 format=3 uid="uid://c4vegpals6qww"]
+
+[ext_resource type="Texture2D" uid="uid://cc3v0xh3ftjrw" path="res://Assets/Spritesheet.png" id="1_ryt7j"]
+[ext_resource type="BitMap" uid="uid://bv81gdm620qpm" path="res://Assets/ClickMasks/diagonal_down_clickmask.bmp" id="2_w4xpe"]
+[ext_resource type="Script" uid="uid://vt6tr7chjo4h" path="res://Scripts/diagonal_connector.gd" id="2_x64f7"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x64f7"]
+atlas = ExtResource("1_ryt7j")
+region = Rect2(64, 0, 96, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w4xpe"]
+atlas = ExtResource("1_ryt7j")
+region = Rect2(160, 0, 96, 96)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1y1xb"]
+
+[node name="TextureButton" type="TextureButton"]
+z_index = -1
+offset_right = 40.0
+offset_bottom = 40.0
+texture_normal = SubResource("AtlasTexture_x64f7")
+texture_pressed = SubResource("AtlasTexture_w4xpe")
+texture_disabled = SubResource("AtlasTexture_1y1xb")
+texture_click_mask = ExtResource("2_w4xpe")
+script = ExtResource("2_x64f7")

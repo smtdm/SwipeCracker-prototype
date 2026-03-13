@@ -4,10 +4,12 @@ extends Node2D
 @onready var circle_buttons_node = game.get_node("Circle_buttons")
 @onready var vertical_connectors_node = game.get_node("Vertical_connectors")
 @onready var horizontal_connectors_node = game.get_node("Horizontal_connectors")
+@onready var diagonal_connectors_node = game.get_node("Diagonal_connectors")
 
 @onready var circle_button = load("res://Scenes/circle_button.tscn")
 @onready var horizontal_connector = load("res://Scenes/horizontal_connector.tscn")
 @onready var vertical_connector = load("res://Scenes/vertical_connector.tscn")
+@onready var diagonal_connector = load("res://Scenes/diagonal_connector.tscn")
 
 @onready var game_manager: Node = %GameManager
 
@@ -21,14 +23,17 @@ var last_pressed = Vector2i(-1,-1)
 
 var connected_vertical_edges = Array()
 var connected_horizontal_edges = Array()
+var connected_diagonal_edges = Array()
 var connected_nodes = Array()
 
 var correct_vertical_edges = Array()
 var correct_horizontal_edges = Array()
+var correct_diagonal_edges = Array()
 var correct_nodes = Array()
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	
 	load_game()
 
 
@@ -44,11 +49,16 @@ func load_game():
 			generate_circle_button(x_pos, y_pos)
 			if x_pos<WIDTH-1:
 				generate_horizontal_connector(Vector2i(x_pos,y_pos),Vector2i(x_pos+1,y_pos))
+				if y_pos<HEIGHT-1:
+					generate_diagonal_connector(Vector2i(x_pos,y_pos),Vector2i(x_pos+1,y_pos+1))
+					generate_diagonal_connector(Vector2i(x_pos,y_pos+1),Vector2i(x_pos+1,y_pos))
 			if y_pos<HEIGHT-1:
 				generate_vertical_connector(Vector2i(x_pos,y_pos),Vector2i(x_pos,y_pos+1))
+
+				
 	game_manager.update_label("edges", 0)
 	game_manager.update_label("nodes", 0)
-	generate_random_graph()
+	generate_random_graph_level2()
 	
 
 func generate_circle_button(x_pos, y_pos):
@@ -79,7 +89,22 @@ func generate_vertical_connector(pos_start,pos_end):
 	vertical_connectors_node.add_child(vertical_connector)
 	return vertical_connector
 
-func generate_random_graph(): # TODO Change to new coordiate system
+func generate_diagonal_connector(pos_start,pos_end):
+	var diagonal_connector = diagonal_connector.instantiate()
+	if (pos_start[1]-pos_end[1])/(pos_start[0]-pos_end[0]) == 1:
+		diagonal_connector.position = Vector2(pos_start[0]*64, pos_start[1]*64) #TODO dit aanpassen dat werkt voor elke connector ([1]-64 als up connector is)
+	elif (pos_start[1]-pos_end[1])/(pos_start[0]-pos_end[0]) == -1:
+		diagonal_connector.position = Vector2(pos_start[0]*64, pos_start[1]*64-64) #TODO dit aanpassen dat werkt voor elke connector ([1]-64 als up connector is)
+	diagonal_connector.pos_start = pos_start
+	diagonal_connector.pos_end = pos_end
+	diagonal_connector.name = str("Diagonal_connector",pos_start,"to",pos_end)
+	diagonal_connectors_node.add_child(diagonal_connector)
+	return diagonal_connector
+
+## Generates a semi-random graph consisting of a single line. 
+## The graph can be drawn without backtracking or lifting the pen
+## Graph contains  only horizontal and vertical edges
+func generate_random_graph_level1(): 
 	var rng = RandomNumberGenerator.new()
 	var directions = ["left", "right", "up", "down"]
 	var directions_weights = PackedFloat32Array([1, 1, 1, 1 ])
@@ -155,6 +180,141 @@ func generate_random_graph(): # TODO Change to new coordiate system
 	print("verticals: ", correct_vertical_edges)
 	print("horizontals: ", correct_horizontal_edges)
 	print("nodes: ", correct_nodes)
+
+## Generates a semi-random graph consisting of a single line. 
+## The graph can be drawn without backtracking or lifting the pen
+## The graph contains horizontal, vertical and diagonal edges
+func generate_random_graph_level2():
+	var rng = RandomNumberGenerator.new()
+	var directions = ["left", "right", "up", "down", "right_down", "right_up", "left_down", "left_up"]
+	var directions_weights = PackedFloat32Array([1, 1, 1, 1, 1, 1, 1, 1])
+	
+	var x_start_point = randi_range(0,WIDTH-1)
+	var y_start_point = randi_range(0,HEIGHT-1)
+	print("start point: ", x_start_point, "; ", y_start_point)
+	
+	var current_x = x_start_point
+	var current_y = y_start_point
+	
+	var current_connection = Array()
+	
+	while randf() > WEIGHT:
+		current_connection.clear()
+		
+		#Add new edge
+		match directions[rng.rand_weighted(directions_weights)]:
+			"left":
+				if (current_x-1)<0:
+					continue
+				else:
+					current_connection.append(Vector2i(current_x-1, current_y))
+					current_connection.append(Vector2i(current_x, current_y))
+					#current_connection.sort()
+					if !correct_horizontal_edges.has(current_connection):
+						correct_horizontal_edges.append([current_connection[0],current_connection[1]])
+						current_x -= 1
+						print("left")
+			
+			"right":
+				if (current_x+1)>WIDTH-1:
+					continue
+				else:
+					current_connection.append(Vector2i(current_x, current_y))
+					current_connection.append(Vector2i(current_x+1, current_y))
+					#current_connection.sort()
+					if !correct_horizontal_edges.has(current_connection):
+						correct_horizontal_edges.append([current_connection[0],current_connection[1]])
+						current_x += 1
+						print("right")
+			"up":
+				if (current_y-1)<0:
+					continue
+				else:
+					current_connection.append(Vector2i(current_x, current_y-1))
+					current_connection.append(Vector2i(current_x, current_y))
+					#current_connection.sort()
+					if !correct_vertical_edges.has(current_connection):
+						correct_vertical_edges.append([current_connection[0],current_connection[1]])
+						current_y -= 1
+						print("up")
+			"down":
+				if (current_y+1)>HEIGHT-1:
+					continue
+				else:
+					current_connection.append(Vector2i(current_x, current_y))
+					current_connection.append(Vector2i(current_x, current_y+1))
+					#current_connection.sort()
+					if !correct_vertical_edges.has(current_connection):
+						correct_vertical_edges.append([current_connection[0],current_connection[1]])
+						current_y += 1
+						print("down")
+			"right_down":
+				if (current_x+1)>WIDTH-1:
+					continue
+				if (current_y+1)>HEIGHT-1:
+					continue
+				else:
+					current_connection.append(Vector2i(current_x, current_y))
+					current_connection.append(Vector2i(current_x+1, current_y+1))
+					if !correct_diagonal_edges.has(current_connection):
+						correct_diagonal_edges.append([current_connection[0],current_connection[1]])
+						current_y += 1
+						current_x += 1
+						print("right_down")
+			"right_up":
+				if (current_x+1)>WIDTH-1:
+					continue
+				if (current_y-1)<0:
+					continue
+				else:
+					current_connection.append(Vector2i(current_x, current_y))
+					current_connection.append(Vector2i(current_x+1, current_y-1))
+					if !correct_diagonal_edges.has(current_connection):
+						correct_diagonal_edges.append([current_connection[0],current_connection[1]])
+						current_y -= 1
+						current_x += 1
+						print("right_up")
+			"left_down":
+				if (current_x-1)<0:
+					continue
+				if (current_y+1)>HEIGHT-1:
+					continue
+				else:
+					current_connection.append(Vector2i(current_x-1, current_y+1))
+					current_connection.append(Vector2i(current_x, current_y))
+					if !correct_diagonal_edges.has(current_connection):
+						correct_diagonal_edges.append([current_connection[0],current_connection[1]])
+						current_y += 1
+						current_x -= 1
+						print("left_down")
+					
+			"left_up":
+				if (current_y-1)<0:
+					continue
+				if (current_x-1)<0:
+					continue
+				else:
+					current_connection.append(Vector2i(current_x-1, current_y-1))
+					current_connection.append(Vector2i(current_x, current_y))
+					if !correct_diagonal_edges.has(current_connection):
+						correct_diagonal_edges.append([current_connection[0],current_connection[1]])
+						current_y -= 1
+						current_x -= 1
+						print("left_up")
+		# generate correct nodes array
+		if !correct_nodes.has(current_connection[0]):
+			correct_nodes.append(current_connection[0])
+		if !correct_nodes.has(current_connection[1]):
+			correct_nodes.append(current_connection[1])
+		
+	correct_horizontal_edges.sort()
+	correct_vertical_edges.sort()
+	correct_nodes.sort()
+
+	print("verticals: ", correct_vertical_edges)
+	print("horizontals: ", correct_horizontal_edges)
+	print("diagonals: ", correct_diagonal_edges)
+	print("nodes: ", correct_nodes)
 	
 func _on_circle_button_pressed(x_pos, y_pos):
 	var now_pressed = Vector2i(x_pos,y_pos)
@@ -187,7 +347,7 @@ func _on_circle_button_pressed(x_pos, y_pos):
 				connected_nodes.append(last_pressed)
 			deselect_button.emit()
 			last_pressed = Vector2i(-1,-1)
-		if abs(last_pressed - now_pressed) == Vector2i(1,0):
+		elif abs(last_pressed - now_pressed) == Vector2i(1,0):
 			# horizontal pressed
 			var current_connector = horizontal_connectors_node.get_node(str("Horizontal_connector",nodes_pressed_array[0],"to",nodes_pressed_array[1]).replace(".","_"))
 			current_connector.disabled = false
@@ -198,8 +358,20 @@ func _on_circle_button_pressed(x_pos, y_pos):
 				connected_nodes.append(last_pressed)
 			deselect_button.emit()
 			last_pressed = Vector2i(-1,-1)
-			
-		#TODO diagonal and slanted
+		
+		
+		elif ((last_pressed[1]-now_pressed[1])/(last_pressed[0]-now_pressed[0]) == -1) or ((last_pressed[1]-now_pressed[1])/(last_pressed[0]-now_pressed[0]) == 1):
+			#diagonal pressed
+			var current_connector = diagonal_connectors_node.get_node(str("Diagonal_connector",nodes_pressed_array[0],"to",nodes_pressed_array[1]).replace(".","_"))
+			current_connector.disabled = false
+			# check if connection is in the array, else add it and its nodes to the connected arrays
+			if !connected_diagonal_edges.has(nodes_pressed_array):
+				connected_diagonal_edges.append(nodes_pressed_array)
+				connected_nodes.append(now_pressed)
+				connected_nodes.append(last_pressed)
+			deselect_button.emit()
+			last_pressed = Vector2i(-1,-1)
+		#TODO and slanted
 		
 		else:
 			deselect_button.emit()
@@ -208,6 +380,7 @@ func _on_circle_button_pressed(x_pos, y_pos):
 	print(x_pos,", ", y_pos)
 	print("vertical edges: ",connected_vertical_edges)
 	print("horizontal edges: ",connected_horizontal_edges)
+	print("diagonal edges: ",connected_diagonal_edges)
 	pass
 		
 func _on_connector_button_pressed(pos_start, pos_end):
@@ -223,14 +396,18 @@ func _on_connector_button_pressed(pos_start, pos_end):
 		connected_vertical_edges.erase(nodes_connected_arr)
 		connected_nodes.erase(pos_start)
 		connected_nodes.erase(pos_end)
-
+	if connected_diagonal_edges.has(nodes_connected_arr):
+		connected_diagonal_edges.erase(nodes_connected_arr)
+		connected_nodes.erase(pos_start)
+		connected_nodes.erase(pos_end)
+		
 func _on_check_button_pressed():
 	var correct_edges = check_connectors()
 	var correct_nodes = check_nodes()
 	game_manager.update_label("correct edges", correct_edges)
 	game_manager.update_label("correct nodes", correct_nodes)
 	# check win condition
-	if len(connected_horizontal_edges)+len(correct_vertical_edges) == correct_edges:
+	if len(connected_horizontal_edges)+len(correct_vertical_edges)+len(correct_diagonal_edges) == correct_edges:
 		print("you won!")
 
 func check_connectors():
@@ -238,6 +415,7 @@ func check_connectors():
 	connected_vertical_edges.sort()
 	var vertical_edges_correct_count = 0
 	var horizontal_edges_correct_count = 0
+	var diagonal_edges_correct_count = 0
 	
 	for vertical_i in connected_vertical_edges:
 		if correct_vertical_edges.has(vertical_i):
@@ -245,8 +423,11 @@ func check_connectors():
 	for horizontal_i in connected_horizontal_edges:
 		if correct_horizontal_edges.has(horizontal_i):
 			horizontal_edges_correct_count += 1
-			
-	var correct_edges = vertical_edges_correct_count+horizontal_edges_correct_count
+	for diagonal_i in connected_diagonal_edges:
+		if correct_diagonal_edges.has(diagonal_i):
+			diagonal_edges_correct_count += 1
+					
+	var correct_edges = vertical_edges_correct_count+horizontal_edges_correct_count+diagonal_edges_correct_count
 	return correct_edges
 
 func check_nodes():
