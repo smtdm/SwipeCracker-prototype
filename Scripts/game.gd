@@ -411,7 +411,7 @@ func _on_check_button_pressed():
 	game_manager.update_label("correct edges", correct_edges)
 	game_manager.update_label("correct nodes", correct_nodes)
 	# check win condition
-	if len(connected_horizontal_edges)+len(correct_vertical_edges)+len(correct_diagonal_edges) == correct_edges:
+	if len(connected_horizontal_edges)+len(connected_vertical_edges)+len(connected_diagonal_edges) == correct_edges:
 		print("you won!")
 		win.emit()
 		
