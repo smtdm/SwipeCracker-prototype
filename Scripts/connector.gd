@@ -41,6 +41,8 @@ func _pressed() -> void:
 
 	connector_button_pressed.emit(pos_start, pos_end)
 	disabled = true
+	if Global.SHOW_CORRECT_SOLUTION:
+		set_self_modulate(Color(1, 1, 1, 0.5))
 
 func _on_win():
 	set_button_mask(0)
@@ -53,25 +55,25 @@ func _on_show_correct_connector(pos_start_i,pos_end_i):
 					disabled_texture = texture_disabled.duplicate() as AtlasTexture
 					disabled_texture.region = Rect2(0,64+offset,32,32)
 					set_texture_disabled(disabled_texture)
-					#set_self_modulate(Color(1, 1, 1, 0.5))
+					set_self_modulate(Color(1, 1, 1, 0.5))
 				"Vertical":
 					disabled_texture = texture_disabled.duplicate() as AtlasTexture
 					disabled_texture.region = Rect2(0,32+offset,32,32)
 					set_texture_disabled(disabled_texture)
-					#set_self_modulate(Color(1, 1, 1, 0.5))
+					set_self_modulate(Color(1, 1, 1, 0.5))
 				"Diagonal":
 					if (pos_start[1]-pos_end[1])/(pos_start[0]-pos_end[0]) == 1:
 						# diagonal down
 						disabled_texture = texture_disabled.duplicate() as AtlasTexture
 						disabled_texture.region = Rect2(64,0+offset,96,96)
 						set_texture_disabled(disabled_texture)
-						#set_self_modulate(Color(1, 1, 1, 0.5))
+						set_self_modulate(Color(1, 1, 1, 0.5))
 					elif (pos_start[1]-pos_end[1])/(pos_start[0]-pos_end[0]) == -1:
 						# diagonal up
 						disabled_texture = texture_disabled.duplicate() as AtlasTexture
 						disabled_texture.region = Rect2(256,0+offset,96,96)
 						set_texture_disabled(disabled_texture)
-						#set_self_modulate(Color(1, 1, 1, 0.5))
+						set_self_modulate(Color(1, 1, 1, 0.5))
 					
 
 func initiate_textures():

@@ -343,6 +343,7 @@ func _on_circle_button_pressed(x_pos, y_pos):
 			# vertical pressed
 			var current_connector = vertical_connectors_node.get_node(str("Vertical_connector",nodes_pressed_array[0],"to",nodes_pressed_array[1]).replace(".","_"))
 			current_connector.disabled = false
+			current_connector.set_self_modulate(Color(1, 1, 1, 1))
 			if !connected_vertical_edges.has(nodes_pressed_array):
 				connected_vertical_edges.append(nodes_pressed_array)
 				connected_nodes.append(now_pressed)
@@ -353,6 +354,7 @@ func _on_circle_button_pressed(x_pos, y_pos):
 			# horizontal pressed
 			var current_connector = horizontal_connectors_node.get_node(str("Horizontal_connector",nodes_pressed_array[0],"to",nodes_pressed_array[1]).replace(".","_"))
 			current_connector.disabled = false
+			current_connector.set_self_modulate(Color(1, 1, 1, 1))
 			# check if connection is in the array, else add it and its nodes to the connected arrays
 			if !connected_horizontal_edges.has(nodes_pressed_array):
 				connected_horizontal_edges.append(nodes_pressed_array)
@@ -366,6 +368,7 @@ func _on_circle_button_pressed(x_pos, y_pos):
 			#diagonal pressed
 			var current_connector = diagonal_connectors_node.get_node(str("Diagonal_connector",nodes_pressed_array[0],"to",nodes_pressed_array[1]).replace(".","_"))
 			current_connector.disabled = false
+			current_connector.set_self_modulate(Color(1, 1, 1, 1))
 			# check if connection is in the array, else add it and its nodes to the connected arrays
 			if !connected_diagonal_edges.has(nodes_pressed_array):
 				connected_diagonal_edges.append(nodes_pressed_array)
