@@ -14,11 +14,12 @@ extends Node2D
 
 signal deselect_button
 signal win
+signal show_correct_connector
 
 const WIDTH: int = 3
 const HEIGHT: int = 3
 const WEIGHT: float = 0.05 # determines the chance an edge will be generated
-const SHOW_CORRECT_SOLUTION: bool = true
+
 
 var last_pressed = Vector2i(-1,-1)
 
@@ -34,9 +35,9 @@ var correct_nodes = Array()
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	
 	load_game()
-
+	if Global.SHOW_CORRECT_SOLUTION:
+		show_correct_connectors()
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -74,7 +75,6 @@ func generate_circle_button(x_pos, y_pos):
 	circle_buttons_node.add_child(circle_button)
 	return circle_button
 	
-	
 func generate_connector(pos_start,pos_end,type):
 	var connector = connector.instantiate()
 	connector.pos_start = pos_start
@@ -95,7 +95,14 @@ func generate_connector(pos_start,pos_end,type):
 				connector.position = Vector2(pos_start[0]*64, pos_start[1]*64-64) 
 			diagonal_connectors_node.add_child(connector)
 	return connector
-
+func show_correct_connectors():
+	for connector in correct_horizontal_edges:
+		show_correct_connector.emit(connector[0],connector[1])
+	for connector in correct_vertical_edges:
+		show_correct_connector.emit(connector[0],connector[1])
+	for connector in correct_diagonal_edges:
+		show_correct_connector.emit(connector[0],connector[1])
+		
 ## Generates a semi-random graph consisting of a single line. 
 ## The graph can be drawn without backtracking or lifting the pen
 ## Graph contains  only horizontal and vertical edges

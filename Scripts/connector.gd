@@ -19,6 +19,8 @@ var y_pos_end = pos_end[1]
 
 var normal_texture:AtlasTexture
 var pressed_texture:AtlasTexture
+var disabled_texture:AtlasTexture
+var offset: int = 240
 
 signal connector_button_pressed(pos_start, pos_end)
 
@@ -28,7 +30,7 @@ func _ready() -> void:
 	disabled = true
 	connector_button_pressed.connect(game._on_connector_button_pressed)
 	game.win.connect(_on_win)
-
+	game.show_correct_connector.connect(_on_show_correct_connector)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -42,6 +44,35 @@ func _pressed() -> void:
 
 func _on_win():
 	set_button_mask(0)
+	
+func _on_show_correct_connector(pos_start_i,pos_end_i):
+	if pos_start==pos_start_i:
+		if pos_end==pos_end_i:
+			match connector_type:
+				"Horizontal":
+					disabled_texture = texture_disabled.duplicate() as AtlasTexture
+					disabled_texture.region = Rect2(0,64+offset,32,32)
+					set_texture_disabled(disabled_texture)
+					#set_self_modulate(Color(1, 1, 1, 0.5))
+				"Vertical":
+					disabled_texture = texture_disabled.duplicate() as AtlasTexture
+					disabled_texture.region = Rect2(0,32+offset,32,32)
+					set_texture_disabled(disabled_texture)
+					#set_self_modulate(Color(1, 1, 1, 0.5))
+				"Diagonal":
+					if (pos_start[1]-pos_end[1])/(pos_start[0]-pos_end[0]) == 1:
+						# diagonal down
+						disabled_texture = texture_disabled.duplicate() as AtlasTexture
+						disabled_texture.region = Rect2(64,0+offset,96,96)
+						set_texture_disabled(disabled_texture)
+						#set_self_modulate(Color(1, 1, 1, 0.5))
+					elif (pos_start[1]-pos_end[1])/(pos_start[0]-pos_end[0]) == -1:
+						# diagonal up
+						disabled_texture = texture_disabled.duplicate() as AtlasTexture
+						disabled_texture.region = Rect2(256,0+offset,96,96)
+						set_texture_disabled(disabled_texture)
+						#set_self_modulate(Color(1, 1, 1, 0.5))
+					
 
 func initiate_textures():
 	match connector_type:
