@@ -21,6 +21,7 @@ signal connector_button_pressed(pos_start, pos_end)
 func _ready() -> void:
 	disabled = true
 	connector_button_pressed.connect(game._on_connector_button_pressed)
+	game.win.connect(_on_win)
 
 	if (pos_start[1]-pos_end[1])/(pos_start[0]-pos_end[0]) == 1:
 		# diagonal down
@@ -53,3 +54,6 @@ func _pressed() -> void:
 
 	connector_button_pressed.emit(pos_start, pos_end)
 	disabled = true
+	
+func _on_win():
+	set_button_mask(0)

@@ -11,6 +11,8 @@ var y_pos: int
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	circle_button_pressed.connect(game._on_circle_button_pressed)
+	game.win.connect(_on_win)
+	
 	pass # Replace with function body.
 
 
@@ -25,3 +27,6 @@ func _pressed() -> void:
 
 func _on_deselect_button():
 	set_pressed(false)
+	
+func _on_win():
+	set_button_mask(0)

@@ -16,7 +16,8 @@ signal connector_button_pressed(pos_start, pos_end)
 func _ready() -> void:
 	disabled = true
 	connector_button_pressed.connect(game._on_connector_button_pressed)
-	pass
+	game.win.connect(_on_win)
+
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -27,3 +28,6 @@ func _pressed() -> void:
 
 	connector_button_pressed.emit(pos_start, pos_end)
 	disabled = true
+
+func _on_win():
+	set_button_mask(0)
