@@ -39,7 +39,21 @@ var correct_nodes = Array()
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	load_game()
+	# initialize grid with nodes and edges
+	initialize_nodes_and_edges()
+	
+	# update labels 
+	game_manager.update_label("correct edges", 0)
+	game_manager.update_label("correct nodes", 0)
+	
+	# connect buttons to win signal
+	win.connect(check_button._on_win)
+	win.connect(clear_button._on_win)
+	
+	# generate correct solution
+	generate_random_graph()
+	
+	# DEBUG: show correct solution
 	if Global.SHOW_CORRECT_SOLUTION:
 		show_correct_connectors()
 
@@ -49,8 +63,7 @@ func _process(delta: float) -> void:
 	pass
 
 ## initialises the game. Should only be called once during the setup. 
-func load_game():
-	
+func initialize_nodes_and_edges():
 	for x_pos in range(WIDTH):
 		for y_pos in range(HEIGHT):
 			# generate nodes
@@ -63,16 +76,7 @@ func load_game():
 					generate_connector(Vector2i(x_pos,y_pos+1),Vector2i(x_pos+1,y_pos),"Diagonal")
 			if y_pos<HEIGHT-1:
 				generate_connector(Vector2i(x_pos,y_pos),Vector2i(x_pos,y_pos+1),"Vertical")
-	# update labels 
-	game_manager.update_label("correct edges", 0)
-	game_manager.update_label("correct nodes", 0)
 	
-	# connect buttons to win signal
-	win.connect(check_button._on_win)
-	win.connect(clear_button._on_win)
-	
-	# generate correct solution
-	generate_random_graph()
 	
 ## generates the clickable nodes on a grid starting from the top left. 
 func generate_circle_button(x_pos, y_pos):
@@ -205,8 +209,8 @@ func generate_random_graph():
 	var rng = RandomNumberGenerator.new()
 	var directions = ["left", "right", "up", "down", "right_down", "right_up", "left_down", "left_up"]
 	var level1_weights = PackedFloat32Array([1, 1, 1, 1, 0, 0, 0, 0]) # only left, right, up and down
-	var level2_weights =  PackedFloat32Array([1, 1, 1, 1, 1, 1, 1, 1])
-	var level3_weights =  PackedFloat32Array([0, 0, 0, 0, 1, 1, 1, 1]) # only diagonals
+	var level2_weights = PackedFloat32Array([1, 1, 1, 1, 1, 1, 1, 1])
+	var level3_weights = PackedFloat32Array([0, 0, 0, 0, 1, 1, 1, 1]) # only diagonals
 	
 	var max_connections = 7 # maximum number of connections (edges)
 	
@@ -472,7 +476,6 @@ func _on_check_button_pressed():
 	game_manager.update_label("correct edges", correct_connected_edges)
 	game_manager.update_label("correct nodes", correct_nodes)
 	# check win condition, total number of all connected edges must be equal to the number of correctly placed edges 
-	# TODO dit klopt nog niet, ook een tekort aan juist geplaatste edges is ok
 	if len(connected_horizontal_edges)+len(connected_vertical_edges)+len(connected_diagonal_edges) == correct_connected_edges:
 		if correct_connected_edges == len(correct_horizontal_edges)+len(correct_vertical_edges)+len(correct_diagonal_edges):
 			win.emit()
