@@ -10,6 +10,7 @@ var y_pos_start = pos_start[1]
 var x_pos_end = pos_end[0]
 var y_pos_end = pos_end[1]
 
+
 signal connector_button_pressed(pos_start, pos_end)
 
 # Called when the node enters the scene tree for the first time.

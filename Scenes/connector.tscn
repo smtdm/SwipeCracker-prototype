@@ -1,19 +1,19 @@
 [gd_scene load_steps=7 format=3 uid="uid://chijmt64q6r1e"]
 
-[ext_resource type="Texture2D" uid="uid://cc3v0xh3ftjrw" path="res://Assets/Spritesheet.png" id="1_hkdtn"]
-[ext_resource type="BitMap" uid="uid://b72p3ipiawsea" path="res://Assets/ClickMasks/vertical_connector_clickmask.bmp" id="2_jgvns"]
-[ext_resource type="Script" uid="uid://cmvwaq3f1uv6v" path="res://Scripts/vertical_connector.gd" id="2_wjwta"]
+[ext_resource type="Texture2D" uid="uid://cc3v0xh3ftjrw" path="res://Assets/Spritesheet.png" id="1_kwloq"]
+[ext_resource type="BitMap" uid="uid://b72p3ipiawsea" path="res://Assets/ClickMasks/vertical_connector_clickmask.bmp" id="2_ot6rp"]
+[ext_resource type="Script" uid="uid://cmvwaq3f1uv6v" path="res://Scripts/connector.gd" id="3_lo275"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_wjwta"]
-atlas = ExtResource("1_hkdtn")
+atlas = ExtResource("1_kwloq")
 region = Rect2(0, 32, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_q4kip"]
-atlas = ExtResource("1_hkdtn")
+atlas = ExtResource("1_kwloq")
 region = Rect2(32, 32, 32, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_vk8lp"]
-atlas = ExtResource("1_hkdtn")
+atlas = ExtResource("1_kwloq")
 region = Rect2(96, 96, 32, 32)
 
 [node name="TextureButton" type="TextureButton"]
@@ -23,5 +23,5 @@ offset_bottom = 32.0
 texture_normal = SubResource("AtlasTexture_wjwta")
 texture_pressed = SubResource("AtlasTexture_q4kip")
 texture_disabled = SubResource("AtlasTexture_vk8lp")
-texture_click_mask = ExtResource("2_jgvns")
-script = ExtResource("2_wjwta")
+texture_click_mask = ExtResource("2_ot6rp")
+script = ExtResource("3_lo275")

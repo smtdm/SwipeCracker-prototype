@@ -8,9 +8,10 @@ extends Node2D
 @onready var check_button_node = game.get_node("CheckButton")
 
 @onready var circle_button = load("res://Scenes/circle_button.tscn")
-@onready var horizontal_connector = load("res://Scenes/horizontal_connector.tscn")
-@onready var vertical_connector = load("res://Scenes/vertical_connector.tscn")
-@onready var diagonal_connector = load("res://Scenes/diagonal_connector.tscn")
+@onready var connector = load("res://Scenes/connector.tscn")
+#@onready var horizontal_connector = load("res://Scenes/horizontal_connector.tscn")
+#@onready var vertical_connector = load("res://Scenes/vertical_connector.tscn")
+#@onready var diagonal_connector = load("res://Scenes/diagonal_connector.tscn")
 
 @onready var game_manager: Node = %GameManager
 
@@ -20,6 +21,7 @@ signal win
 const WIDTH: int = 3
 const HEIGHT: int = 3
 const WEIGHT: float = 0.05 # determines the chance an edge will be generated
+const SHOW_CORRECT_SOLUTION: bool = true
 
 var last_pressed = Vector2i(-1,-1)
 
@@ -50,12 +52,12 @@ func load_game():
 		for y_pos in range(HEIGHT):
 			generate_circle_button(x_pos, y_pos)
 			if x_pos<WIDTH-1:
-				generate_horizontal_connector(Vector2i(x_pos,y_pos),Vector2i(x_pos+1,y_pos))
+				generate_connector(Vector2i(x_pos,y_pos),Vector2i(x_pos+1,y_pos),"Horizontal")
 				if y_pos<HEIGHT-1:
-					generate_diagonal_connector(Vector2i(x_pos,y_pos),Vector2i(x_pos+1,y_pos+1))
-					generate_diagonal_connector(Vector2i(x_pos,y_pos+1),Vector2i(x_pos+1,y_pos))
+					generate_connector(Vector2i(x_pos,y_pos),Vector2i(x_pos+1,y_pos+1),"Diagonal")
+					generate_connector(Vector2i(x_pos,y_pos+1),Vector2i(x_pos+1,y_pos),"Diagonal")
 			if y_pos<HEIGHT-1:
-				generate_vertical_connector(Vector2i(x_pos,y_pos),Vector2i(x_pos,y_pos+1))
+				generate_connector(Vector2i(x_pos,y_pos),Vector2i(x_pos,y_pos+1),"Vertical")
 
 				
 	game_manager.update_label("edges", 0)
@@ -75,35 +77,56 @@ func generate_circle_button(x_pos, y_pos):
 	circle_buttons_node.add_child(circle_button)
 	return circle_button
 	
-func generate_horizontal_connector(pos_start,pos_end):
-	var horizontal_connector = horizontal_connector.instantiate()
-	horizontal_connector.position = Vector2(pos_start[0]*64+32, pos_start[1]*64)
-	horizontal_connector.pos_start = pos_start
-	horizontal_connector.pos_end = pos_end
-	horizontal_connector.name = str("Horizontal_connector",pos_start,"to",pos_end)
-	horizontal_connectors_node.add_child(horizontal_connector)
-	return horizontal_connector
+#func generate_horizontal_connector(pos_start,pos_end):
+	#var horizontal_connector = horizontal_connector.instantiate()
+	#horizontal_connector.position = Vector2(pos_start[0]*64+32, pos_start[1]*64)
+	#horizontal_connector.pos_start = pos_start
+	#horizontal_connector.pos_end = pos_end
+	#horizontal_connector.name = str("Horizontal_connector",pos_start,"to",pos_end)
+	#horizontal_connectors_node.add_child(horizontal_connector)
+	#return horizontal_connector
+	
+func generate_connector(pos_start,pos_end,type):
+	var connector = connector.instantiate()
+	connector.pos_start = pos_start
+	connector.pos_end = pos_end
+	connector.connector_type = type
+	connector.name = str(type,"_connector",pos_start,"to",pos_end)
+	match type:
+		"Horizontal":
+			connector.position = Vector2(pos_start[0]*64+32, pos_start[1]*64)
+			horizontal_connectors_node.add_child(connector)
+		"Vertical":
+			connector.position = Vector2(pos_start[0]*64, pos_start[1]*64+32)
+			vertical_connectors_node.add_child(connector)
+		"Diagonal":
+			if (pos_start[1]-pos_end[1])/(pos_start[0]-pos_end[0]) == 1:
+				connector.position = Vector2(pos_start[0]*64, pos_start[1]*64) #TODO dit aanpassen dat werkt voor elke connector ([1]-64 als up connector is)
+			elif (pos_start[1]-pos_end[1])/(pos_start[0]-pos_end[0]) == -1:
+				connector.position = Vector2(pos_start[0]*64, pos_start[1]*64-64) #TODO dit aanpassen dat werkt voor elke connector ([1]-64 als up connector is)
+			diagonal_connectors_node.add_child(connector)
+	return connector
 		
-func generate_vertical_connector(pos_start,pos_end):
-	var vertical_connector = vertical_connector.instantiate()
-	vertical_connector.position = Vector2(pos_start[0]*64, pos_start[1]*64+32)
-	vertical_connector.pos_start = pos_start
-	vertical_connector.pos_end = pos_end
-	vertical_connector.name = str("Vertical_connector",pos_start,"to",pos_end)
-	vertical_connectors_node.add_child(vertical_connector)
-	return vertical_connector
+#func generate_vertical_connector(pos_start,pos_end):
+	#var vertical_connector = vertical_connector.instantiate()
+	#vertical_connector.position = Vector2(pos_start[0]*64, pos_start[1]*64+32)
+	#vertical_connector.pos_start = pos_start
+	#vertical_connector.pos_end = pos_end
+	#vertical_connector.name = str("Vertical_connector",pos_start,"to",pos_end)
+	#vertical_connectors_node.add_child(vertical_connector)
+	#return vertical_connector
 
-func generate_diagonal_connector(pos_start,pos_end):
-	var diagonal_connector = diagonal_connector.instantiate()
-	if (pos_start[1]-pos_end[1])/(pos_start[0]-pos_end[0]) == 1:
-		diagonal_connector.position = Vector2(pos_start[0]*64, pos_start[1]*64) #TODO dit aanpassen dat werkt voor elke connector ([1]-64 als up connector is)
-	elif (pos_start[1]-pos_end[1])/(pos_start[0]-pos_end[0]) == -1:
-		diagonal_connector.position = Vector2(pos_start[0]*64, pos_start[1]*64-64) #TODO dit aanpassen dat werkt voor elke connector ([1]-64 als up connector is)
-	diagonal_connector.pos_start = pos_start
-	diagonal_connector.pos_end = pos_end
-	diagonal_connector.name = str("Diagonal_connector",pos_start,"to",pos_end)
-	diagonal_connectors_node.add_child(diagonal_connector)
-	return diagonal_connector
+#func generate_diagonal_connector(pos_start,pos_end):
+	#var diagonal_connector = diagonal_connector.instantiate()
+	#if (pos_start[1]-pos_end[1])/(pos_start[0]-pos_end[0]) == 1:
+		#diagonal_connector.position = Vector2(pos_start[0]*64, pos_start[1]*64) #TODO dit aanpassen dat werkt voor elke connector ([1]-64 als up connector is)
+	#elif (pos_start[1]-pos_end[1])/(pos_start[0]-pos_end[0]) == -1:
+		#diagonal_connector.position = Vector2(pos_start[0]*64, pos_start[1]*64-64) #TODO dit aanpassen dat werkt voor elke connector ([1]-64 als up connector is)
+	#diagonal_connector.pos_start = pos_start
+	#diagonal_connector.pos_end = pos_end
+	#diagonal_connector.name = str("Diagonal_connector",pos_start,"to",pos_end)
+	#diagonal_connectors_node.add_child(diagonal_connector)
+	#return diagonal_connector
 
 ## Generates a semi-random graph consisting of a single line. 
 ## The graph can be drawn without backtracking or lifting the pen
