@@ -9,6 +9,6 @@ var value = 0
 func update_label(label, value):
 	match label:
 		"correct edges":
-			correct_edges_label.text = "Correct Edges: " + str(value) + "  "
+			correct_edges_label.text = "Correct Edges: " + str(value) + " "
 		"correct nodes":
-			correct_nodes_label.text = "Correct Nodes: " + str(value) + "  "
+			correct_nodes_label.text = "Correct Nodes: " + str(value) + " "

@@ -406,12 +406,12 @@ func _on_connector_button_pressed(pos_start, pos_end):
 		connected_nodes.erase(pos_end)
 		
 func _on_check_button_pressed():
-	var correct_edges = check_connectors()
+	var correct_connected_edges = check_connectors()
 	var correct_nodes = check_nodes()
-	game_manager.update_label("correct edges", correct_edges)
+	game_manager.update_label("correct edges", correct_connected_edges)
 	game_manager.update_label("correct nodes", correct_nodes)
 	# check win condition
-	if len(connected_horizontal_edges)+len(connected_vertical_edges)+len(connected_diagonal_edges) == correct_edges:
+	if len(correct_horizontal_edges)+len(correct_vertical_edges)+len(correct_diagonal_edges) == correct_connected_edges:
 		print("you won!")
 		win.emit()
 		
