@@ -5,7 +5,9 @@ extends Node2D
 @onready var vertical_connectors_node = game.get_node("Vertical_connectors")
 @onready var horizontal_connectors_node = game.get_node("Horizontal_connectors")
 @onready var diagonal_connectors_node = game.get_node("Diagonal_connectors")
-@onready var check_button_node = game.get_node("CheckButton")
+
+@onready var check_button = game.get_node("CheckButton")
+@onready var clear_button = game.get_node("ClearButton")
 
 @onready var circle_button = load("res://Scenes/circle_button.tscn")
 @onready var connector = load("res://Scenes/connector.tscn")
@@ -20,6 +22,7 @@ const WIDTH: int = 3
 const HEIGHT: int = 3
 const WEIGHT: float = 0.05 # determines the chance an edge will be generated
 
+var game_won: bool = false
 
 var last_pressed = Vector2i(-1,-1)
 
@@ -61,8 +64,9 @@ func load_game():
 	game_manager.update_label("edges", 0)
 	game_manager.update_label("nodes", 0)
 	
-	win.connect(check_button_node._on_win)
-	generate_random_graph_level2()
+	win.connect(check_button._on_win)
+	win.connect(clear_button._on_win)
+	generate_random_graph()
 	
 
 func generate_circle_button(x_pos, y_pos):
@@ -103,93 +107,99 @@ func show_correct_connectors():
 	for connector in correct_diagonal_edges:
 		show_correct_connector.emit(connector[0],connector[1])
 		
-## Generates a semi-random graph consisting of a single line. 
-## The graph can be drawn without backtracking or lifting the pen
-## Graph contains  only horizontal and vertical edges
-func generate_random_graph_level1(): 
-	var rng = RandomNumberGenerator.new()
-	var directions = ["left", "right", "up", "down"]
-	var directions_weights = PackedFloat32Array([1, 1, 1, 1 ])
-	
-	var x_start_point = randi_range(0,WIDTH-1)
-	var y_start_point = randi_range(0,HEIGHT-1)
-	print("start point: ", x_start_point, "; ", y_start_point)
-	
-	var current_x = x_start_point
-	var current_y = y_start_point
-	
-	var current_connection = Array()
-	
-	while randf() > WEIGHT:
-		current_connection.clear()
-		
-		#Add new edge
-		match directions[rng.rand_weighted(directions_weights)]:
-			"left":
-				if (current_x-1)<0:
-					continue
-				else:
-					current_connection.append(Vector2i(current_x-1, current_y))
-					current_connection.append(Vector2i(current_x, current_y))
-					#current_connection.sort()
-					if !correct_horizontal_edges.has(current_connection):
-						correct_horizontal_edges.append([current_connection[0],current_connection[1]])
-						current_x -= 1
-
-			"right":
-				if (current_x+1)>WIDTH-1:
-					continue
-				else:
-					current_connection.append(Vector2i(current_x, current_y))
-					current_connection.append(Vector2i(current_x+1, current_y))
-					#current_connection.sort()
-					if !correct_horizontal_edges.has(current_connection):
-						correct_horizontal_edges.append([current_connection[0],current_connection[1]])
-						current_x += 1
-
-			"up":
-				if (current_y-1)<0:
-					continue
-				else:
-					current_connection.append(Vector2i(current_x, current_y-1))
-					current_connection.append(Vector2i(current_x, current_y))
-					#current_connection.sort()
-					if !correct_vertical_edges.has(current_connection):
-						correct_vertical_edges.append([current_connection[0],current_connection[1]])
-						current_y -= 1
-
-			"down":
-				if (current_y+1)>HEIGHT-1:
-					continue
-				else:
-					current_connection.append(Vector2i(current_x, current_y))
-					current_connection.append(Vector2i(current_x, current_y+1))
-					#current_connection.sort()
-					if !correct_vertical_edges.has(current_connection):
-						correct_vertical_edges.append([current_connection[0],current_connection[1]])
-						current_y += 1
-		
-		# generate correct nodes array
-		if !correct_nodes.has(current_connection[0]):
-			correct_nodes.append(current_connection[0])
-		if !correct_nodes.has(current_connection[1]):
-			correct_nodes.append(current_connection[1])
-		
-	correct_horizontal_edges.sort()
-	correct_vertical_edges.sort()
-	correct_nodes.sort()
-
-	print("verticals: ", correct_vertical_edges)
-	print("horizontals: ", correct_horizontal_edges)
-	print("nodes: ", correct_nodes)
+### Generates a semi-random graph consisting of a single line. 
+### The graph can be drawn without backtracking or lifting the pen
+### Graph contains  only horizontal and vertical edges
+#func generate_random_graph_level1(): 
+	#var rng = RandomNumberGenerator.new()
+	#var directions = ["left", "right", "up", "down"]
+	#var directions_weights = PackedFloat32Array([1, 1, 1, 1 ])
+	#
+	#var x_start_point = randi_range(0,WIDTH-1)
+	#var y_start_point = randi_range(0,HEIGHT-1)
+	#print("start point: ", x_start_point, "; ", y_start_point)
+	#
+	#var current_x = x_start_point
+	#var current_y = y_start_point
+	#
+	#var current_connection = Array()
+	#
+	#while randf() > WEIGHT:
+		#current_connection.clear()
+		#
+		##Add new edge
+		#match directions[rng.rand_weighted(directions_weights)]:
+			#"left":
+				#if (current_x-1)<0:
+					#continue
+				#else:
+					#current_connection.append(Vector2i(current_x-1, current_y))
+					#current_connection.append(Vector2i(current_x, current_y))
+					##current_connection.sort()
+					#if !correct_horizontal_edges.has(current_connection):
+						#correct_horizontal_edges.append([current_connection[0],current_connection[1]])
+						#current_x -= 1
+#
+			#"right":
+				#if (current_x+1)>WIDTH-1:
+					#continue
+				#else:
+					#current_connection.append(Vector2i(current_x, current_y))
+					#current_connection.append(Vector2i(current_x+1, current_y))
+					##current_connection.sort()
+					#if !correct_horizontal_edges.has(current_connection):
+						#correct_horizontal_edges.append([current_connection[0],current_connection[1]])
+						#current_x += 1
+#
+			#"up":
+				#if (current_y-1)<0:
+					#continue
+				#else:
+					#current_connection.append(Vector2i(current_x, current_y-1))
+					#current_connection.append(Vector2i(current_x, current_y))
+					##current_connection.sort()
+					#if !correct_vertical_edges.has(current_connection):
+						#correct_vertical_edges.append([current_connection[0],current_connection[1]])
+						#current_y -= 1
+#
+			#"down":
+				#if (current_y+1)>HEIGHT-1:
+					#continue
+				#else:
+					#current_connection.append(Vector2i(current_x, current_y))
+					#current_connection.append(Vector2i(current_x, current_y+1))
+					##current_connection.sort()
+					#if !correct_vertical_edges.has(current_connection):
+						#correct_vertical_edges.append([current_connection[0],current_connection[1]])
+						#current_y += 1
+		#
+		## generate correct nodes array
+		#if !correct_nodes.has(current_connection[0]):
+			#correct_nodes.append(current_connection[0])
+		#if !correct_nodes.has(current_connection[1]):
+			#correct_nodes.append(current_connection[1])
+		#
+	#correct_horizontal_edges.sort()
+	#correct_vertical_edges.sort()
+	#correct_nodes.sort()
+#
+	#print("verticals: ", correct_vertical_edges)
+	#print("horizontals: ", correct_horizontal_edges)
+	#print("nodes: ", correct_nodes)
 
 ## Generates a semi-random graph consisting of a single line. 
 ## The graph can be drawn without backtracking or lifting the pen
 ## The graph contains horizontal, vertical and diagonal edges
-func generate_random_graph_level2():
+## tweak the weights to gain a different experience
+func generate_random_graph():
 	var rng = RandomNumberGenerator.new()
 	var directions = ["left", "right", "up", "down", "right_down", "right_up", "left_down", "left_up"]
-	var directions_weights = PackedFloat32Array([1, 1, 1, 1, 1, 1, 1, 1])
+	var level1_weights = PackedFloat32Array([1, 1, 1, 1, 0, 0, 0, 0])
+	var level2_weights =  PackedFloat32Array([1, 1, 1, 1, 1, 1, 1, 1])
+	
+	var max_connections = 7
+	
+	var directions_weights = level1_weights
 	
 	var x_start_point = randi_range(0,WIDTH-1)
 	var y_start_point = randi_range(0,HEIGHT-1)
@@ -199,8 +209,17 @@ func generate_random_graph_level2():
 	var current_y = y_start_point
 	
 	var current_connection = Array()
+	var number_of_connections: int = 0
 	
-	while randf() > WEIGHT:
+	var x: int = 0
+	#while randf() > WEIGHT:
+	while number_of_connections < max_connections:
+		# failsafe
+		x += 1
+		print(x)
+		if x> max_connections**2:
+			break
+			
 		current_connection.clear()
 		
 		#Add new edge
@@ -215,6 +234,7 @@ func generate_random_graph_level2():
 					if !correct_horizontal_edges.has(current_connection):
 						correct_horizontal_edges.append([current_connection[0],current_connection[1]])
 						current_x -= 1
+						number_of_connections += 1
 						print("left")
 			
 			"right":
@@ -227,6 +247,7 @@ func generate_random_graph_level2():
 					if !correct_horizontal_edges.has(current_connection):
 						correct_horizontal_edges.append([current_connection[0],current_connection[1]])
 						current_x += 1
+						number_of_connections += 1
 						print("right")
 			"up":
 				if (current_y-1)<0:
@@ -238,6 +259,7 @@ func generate_random_graph_level2():
 					if !correct_vertical_edges.has(current_connection):
 						correct_vertical_edges.append([current_connection[0],current_connection[1]])
 						current_y -= 1
+						number_of_connections += 1
 						print("up")
 			"down":
 				if (current_y+1)>HEIGHT-1:
@@ -249,6 +271,7 @@ func generate_random_graph_level2():
 					if !correct_vertical_edges.has(current_connection):
 						correct_vertical_edges.append([current_connection[0],current_connection[1]])
 						current_y += 1
+						number_of_connections += 1
 						print("down")
 			"right_down":
 				if (current_x+1)>WIDTH-1:
@@ -262,6 +285,7 @@ func generate_random_graph_level2():
 						correct_diagonal_edges.append([current_connection[0],current_connection[1]])
 						current_y += 1
 						current_x += 1
+						number_of_connections += 1
 						print("right_down")
 			"right_up":
 				if (current_x+1)>WIDTH-1:
@@ -275,6 +299,7 @@ func generate_random_graph_level2():
 						correct_diagonal_edges.append([current_connection[0],current_connection[1]])
 						current_y -= 1
 						current_x += 1
+						number_of_connections += 1
 						print("right_up")
 			"left_down":
 				if (current_x-1)<0:
@@ -288,6 +313,7 @@ func generate_random_graph_level2():
 						correct_diagonal_edges.append([current_connection[0],current_connection[1]])
 						current_y += 1
 						current_x -= 1
+						number_of_connections += 1
 						print("left_down")
 					
 			"left_up":
@@ -302,6 +328,7 @@ func generate_random_graph_level2():
 						correct_diagonal_edges.append([current_connection[0],current_connection[1]])
 						current_y -= 1
 						current_x -= 1
+						number_of_connections += 1
 						print("left_up")
 		# generate correct nodes array
 		if !correct_nodes.has(current_connection[0]):
@@ -376,17 +403,12 @@ func _on_circle_button_pressed(x_pos, y_pos):
 				connected_nodes.append(last_pressed)
 			deselect_button.emit()
 			last_pressed = Vector2i(-1,-1)
-		#TODO and slanted
+		#TODO slanted
 		
 		else:
 			deselect_button.emit()
 			last_pressed = Vector2i(-1,-1)
-		pass
-	print(x_pos,", ", y_pos)
-	print("vertical edges: ",connected_vertical_edges)
-	print("horizontal edges: ",connected_horizontal_edges)
-	print("diagonal edges: ",connected_diagonal_edges)
-	pass
+
 		
 func _on_connector_button_pressed(pos_start, pos_end):
 	var nodes_connected_arr = Array()
@@ -413,9 +435,14 @@ func _on_check_button_pressed():
 	game_manager.update_label("correct nodes", correct_nodes)
 	# check win condition
 	if len(correct_horizontal_edges)+len(correct_vertical_edges)+len(correct_diagonal_edges) == correct_connected_edges:
-		print("you won!")
 		win.emit()
-		
+		game_won = true
+
+func _on_clear_button_pressed():
+	
+	if game_won:
+		reset_game()
+	
 
 func check_connectors():
 	connected_horizontal_edges.sort()
@@ -445,3 +472,6 @@ func check_nodes():
 		if connected_nodes.has(nodes_i):
 			nodes_correct_count +=1
 	return nodes_correct_count
+	
+func reset_game():
+	get_tree().reload_current_scene()
