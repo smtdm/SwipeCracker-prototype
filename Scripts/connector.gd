@@ -114,6 +114,7 @@ func initiate_textures():
 				set_texture_normal(normal_texture)
 				set_texture_pressed(pressed_texture)
 				set("texture_click_mask",clickmask_up)
+				
 func disable_connector():
 	disabled = true
 	if Global.SHOW_CORRECT_SOLUTION:

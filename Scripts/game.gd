@@ -48,11 +48,14 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	pass
 
-
+## initialises the game. Should only be called once during the setup. 
 func load_game():
+	
 	for x_pos in range(WIDTH):
 		for y_pos in range(HEIGHT):
+			# generate nodes
 			generate_circle_button(x_pos, y_pos)
+			# Generate edges
 			if x_pos<WIDTH-1:
 				generate_connector(Vector2i(x_pos,y_pos),Vector2i(x_pos+1,y_pos),"Horizontal")
 				if y_pos<HEIGHT-1:
@@ -60,16 +63,18 @@ func load_game():
 					generate_connector(Vector2i(x_pos,y_pos+1),Vector2i(x_pos+1,y_pos),"Diagonal")
 			if y_pos<HEIGHT-1:
 				generate_connector(Vector2i(x_pos,y_pos),Vector2i(x_pos,y_pos+1),"Vertical")
-
-				
-	game_manager.update_label("edges", 0)
-	game_manager.update_label("nodes", 0)
+	# update labels 
+	game_manager.update_label("correct edges", 0)
+	game_manager.update_label("correct nodes", 0)
 	
+	# connect buttons to win signal
 	win.connect(check_button._on_win)
 	win.connect(clear_button._on_win)
+	
+	# generate correct solution
 	generate_random_graph()
 	
-
+## generates the clickable nodes on a grid starting from the top left. 
 func generate_circle_button(x_pos, y_pos):
 	var circle_button = circle_button.instantiate()
 	circle_button.position = Vector2(x_pos*64, y_pos*64)
@@ -77,9 +82,11 @@ func generate_circle_button(x_pos, y_pos):
 	circle_button.y_pos = int(y_pos)
 	circle_button.name = str("Circle_button",x_pos,",",y_pos)
 	deselect_button.connect(circle_button._on_deselect_button)
-	circle_buttons_node.add_child(circle_button)
+	circle_buttons_node.add_child(circle_button) # add to a general node for better organisation
 	return circle_button
-	
+
+## Generates the connectors between the nodes. 
+## Uses the starting and end position (the position of two nodes) to check the type of connector.
 func generate_connector(pos_start,pos_end,type):
 	var connector = connector.instantiate()
 	connector.pos_start = pos_start
@@ -100,6 +107,8 @@ func generate_connector(pos_start,pos_end,type):
 				connector.position = Vector2(pos_start[0]*64, pos_start[1]*64-64) 
 			diagonal_connectors_node.add_child(connector)
 	return connector
+
+## Shows all correct connections. Should only be used as a debug tool
 func show_correct_connectors():
 	for connector in correct_horizontal_edges:
 		show_correct_connector.emit(connector[0],connector[1])
@@ -190,17 +199,18 @@ func show_correct_connectors():
 
 ## Generates a semi-random graph consisting of a single line. 
 ## The graph can be drawn without backtracking or lifting the pen
-## The graph contains horizontal, vertical and diagonal edges
-## tweak the weights to gain a different experience
+## The graph contains horizontal, vertical and/or diagonal edges
+## tweak the weights to gain a different experience, a weight of 0 means that type of connection will not be used
 func generate_random_graph():
 	var rng = RandomNumberGenerator.new()
 	var directions = ["left", "right", "up", "down", "right_down", "right_up", "left_down", "left_up"]
-	var level1_weights = PackedFloat32Array([1, 1, 1, 1, 0, 0, 0, 0])
+	var level1_weights = PackedFloat32Array([1, 1, 1, 1, 0, 0, 0, 0]) # only left, right, up and down
 	var level2_weights =  PackedFloat32Array([1, 1, 1, 1, 1, 1, 1, 1])
+	var level3_weights =  PackedFloat32Array([0, 0, 0, 0, 1, 1, 1, 1]) # only diagonals
 	
-	var max_connections = 7
+	var max_connections = 7 # maximum number of connections (edges)
 	
-	var directions_weights = level1_weights
+	var directions_weights = level3_weights
 	
 	var x_start_point = randi_range(0,WIDTH-1)
 	var y_start_point = randi_range(0,HEIGHT-1)
@@ -215,15 +225,16 @@ func generate_random_graph():
 	var x: int = 0
 	#while randf() > WEIGHT:
 	while number_of_connections < max_connections:
-		# failsafe
+		# failsafe, if the generator gets stuck it will end eventually
 		x += 1
 		print(x)
 		if x> max_connections**2:
 			break
-			
+
 		current_connection.clear()
 		
-		#Add new edge
+		# Add new edge, checks first if the connection will not be out of bounds, then checks if the connection already has been made.
+		# If not, adds the connection and moves to the new node
 		match directions[rng.rand_weighted(directions_weights)]:
 			"left":
 				if (current_x-1)<0:
@@ -231,7 +242,6 @@ func generate_random_graph():
 				else:
 					current_connection.append(Vector2i(current_x-1, current_y))
 					current_connection.append(Vector2i(current_x, current_y))
-					#current_connection.sort()
 					if !correct_horizontal_edges.has(current_connection):
 						correct_horizontal_edges.append([current_connection[0],current_connection[1]])
 						current_x -= 1
@@ -346,6 +356,38 @@ func generate_random_graph():
 	print("diagonals: ", correct_diagonal_edges)
 	print("nodes: ", correct_nodes)
 	
+func check_connectors():
+	connected_horizontal_edges.sort()
+	connected_vertical_edges.sort()
+	var vertical_edges_correct_count = 0
+	var horizontal_edges_correct_count = 0
+	var diagonal_edges_correct_count = 0
+	
+	for vertical_i in connected_vertical_edges:
+		if correct_vertical_edges.has(vertical_i):
+			vertical_edges_correct_count += 1
+	for horizontal_i in connected_horizontal_edges:
+		if correct_horizontal_edges.has(horizontal_i):
+			horizontal_edges_correct_count += 1
+	for diagonal_i in connected_diagonal_edges:
+		if correct_diagonal_edges.has(diagonal_i):
+			diagonal_edges_correct_count += 1
+					
+	var correct_edges = vertical_edges_correct_count+horizontal_edges_correct_count+diagonal_edges_correct_count
+	return correct_edges
+
+func check_nodes():
+	connected_nodes.sort()
+	var nodes_correct_count = 0
+	
+	for nodes_i in correct_nodes:
+		if connected_nodes.has(nodes_i):
+			nodes_correct_count +=1
+	return nodes_correct_count
+	
+func reset_game():
+	get_tree().reload_current_scene()
+	
 func _on_circle_button_pressed(x_pos, y_pos):
 	var now_pressed = Vector2i(x_pos,y_pos)
 	
@@ -435,7 +477,7 @@ func _on_check_button_pressed():
 	game_manager.update_label("correct edges", correct_connected_edges)
 	game_manager.update_label("correct nodes", correct_nodes)
 	# check win condition
-	if len(correct_horizontal_edges)+len(correct_vertical_edges)+len(correct_diagonal_edges) == correct_connected_edges:
+	if len(connected_horizontal_edges)+len(connected_vertical_edges)+len(connected_diagonal_edges) == correct_connected_edges:
 		win.emit()
 		game_won = true
 
@@ -448,34 +490,3 @@ func _on_clear_button_pressed():
 	connected_diagonal_edges.clear()
 	connected_nodes.clear()
 	
-func check_connectors():
-	connected_horizontal_edges.sort()
-	connected_vertical_edges.sort()
-	var vertical_edges_correct_count = 0
-	var horizontal_edges_correct_count = 0
-	var diagonal_edges_correct_count = 0
-	
-	for vertical_i in connected_vertical_edges:
-		if correct_vertical_edges.has(vertical_i):
-			vertical_edges_correct_count += 1
-	for horizontal_i in connected_horizontal_edges:
-		if correct_horizontal_edges.has(horizontal_i):
-			horizontal_edges_correct_count += 1
-	for diagonal_i in connected_diagonal_edges:
-		if correct_diagonal_edges.has(diagonal_i):
-			diagonal_edges_correct_count += 1
-					
-	var correct_edges = vertical_edges_correct_count+horizontal_edges_correct_count+diagonal_edges_correct_count
-	return correct_edges
-
-func check_nodes():
-	connected_nodes.sort()
-	var nodes_correct_count = 0
-	
-	for nodes_i in correct_nodes:
-		if connected_nodes.has(nodes_i):
-			nodes_correct_count +=1
-	return nodes_correct_count
-	
-func reset_game():
-	get_tree().reload_current_scene()
