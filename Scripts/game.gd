@@ -5,6 +5,7 @@ extends Node2D
 @onready var vertical_connectors_node = game.get_node("Vertical_connectors")
 @onready var horizontal_connectors_node = game.get_node("Horizontal_connectors")
 @onready var diagonal_connectors_node = game.get_node("Diagonal_connectors")
+@onready var check_button_node = game.get_node("CheckButton")
 
 @onready var circle_button = load("res://Scenes/circle_button.tscn")
 @onready var horizontal_connector = load("res://Scenes/horizontal_connector.tscn")
@@ -14,6 +15,7 @@ extends Node2D
 @onready var game_manager: Node = %GameManager
 
 signal deselect_button
+signal win
 
 const WIDTH: int = 3
 const HEIGHT: int = 3
@@ -58,6 +60,8 @@ func load_game():
 				
 	game_manager.update_label("edges", 0)
 	game_manager.update_label("nodes", 0)
+	
+	win.connect(check_button_node._on_win)
 	generate_random_graph_level2()
 	
 
@@ -409,6 +413,8 @@ func _on_check_button_pressed():
 	# check win condition
 	if len(connected_horizontal_edges)+len(correct_vertical_edges)+len(correct_diagonal_edges) == correct_edges:
 		print("you won!")
+		win.emit()
+		
 
 func check_connectors():
 	connected_horizontal_edges.sort()

@@ -18,6 +18,7 @@ func _pressed() -> void:
 	check_button_pressed.emit()
 	pass
 	
-
+func _on_win():
+	text = "You Won!"
 	
 	

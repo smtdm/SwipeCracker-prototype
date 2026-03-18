@@ -63,10 +63,10 @@ text = "Used Nodes: X"
 horizontal_alignment = 2
 
 [node name="CheckButton" type="Button" parent="."]
-offset_left = 1.0
-offset_top = 436.0
-offset_right = 89.0
-offset_bottom = 460.0
+offset_left = 9.0
+offset_top = 441.0
+offset_right = 137.0
+offset_bottom = 473.0
 theme_override_fonts/font = ExtResource("4_i6g32")
 theme_override_font_sizes/font_size = 24
 text = "Check"
