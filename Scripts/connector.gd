@@ -31,7 +31,7 @@ func _ready() -> void:
 	connector_button_pressed.connect(game._on_connector_button_pressed)
 	game.win.connect(_on_win)
 	game.show_correct_connector.connect(_on_show_correct_connector)
-
+	game.disable_connector.connect(_on_disable_connector)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
@@ -40,13 +40,14 @@ func _process(delta: float) -> void:
 func _pressed() -> void:
 
 	connector_button_pressed.emit(pos_start, pos_end)
-	disabled = true
-	if Global.SHOW_CORRECT_SOLUTION:
-		set_self_modulate(Color(1, 1, 1, 0.5))
+	disable_connector()
 
 func _on_win():
 	set_button_mask(0)
-	
+
+func _on_disable_connector():
+	disable_connector()
+		
 func _on_show_correct_connector(pos_start_i,pos_end_i):
 	if pos_start==pos_start_i:
 		if pos_end==pos_end_i:
@@ -113,3 +114,7 @@ func initiate_textures():
 				set_texture_normal(normal_texture)
 				set_texture_pressed(pressed_texture)
 				set("texture_click_mask",clickmask_up)
+func disable_connector():
+	disabled = true
+	if Global.SHOW_CORRECT_SOLUTION:
+		set_self_modulate(Color(1, 1, 1, 0.5))

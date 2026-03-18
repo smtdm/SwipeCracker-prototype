@@ -17,6 +17,7 @@ extends Node2D
 signal deselect_button
 signal win
 signal show_correct_connector
+signal disable_connector
 
 const WIDTH: int = 3
 const HEIGHT: int = 3
@@ -439,11 +440,14 @@ func _on_check_button_pressed():
 		game_won = true
 
 func _on_clear_button_pressed():
-	
 	if game_won:
 		reset_game()
+	disable_connector.emit()
+	connected_horizontal_edges.clear()
+	connected_vertical_edges.clear()
+	connected_diagonal_edges.clear()
+	connected_nodes.clear()
 	
-
 func check_connectors():
 	connected_horizontal_edges.sort()
 	connected_vertical_edges.sort()
