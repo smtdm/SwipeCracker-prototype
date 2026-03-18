@@ -210,7 +210,7 @@ func generate_random_graph():
 	
 	var max_connections = 7 # maximum number of connections (edges)
 	
-	var directions_weights = level3_weights
+	var directions_weights = level2_weights
 	
 	var x_start_point = randi_range(0,WIDTH-1)
 	var y_start_point = randi_range(0,HEIGHT-1)
@@ -254,7 +254,6 @@ func generate_random_graph():
 				else:
 					current_connection.append(Vector2i(current_x, current_y))
 					current_connection.append(Vector2i(current_x+1, current_y))
-					#current_connection.sort()
 					if !correct_horizontal_edges.has(current_connection):
 						correct_horizontal_edges.append([current_connection[0],current_connection[1]])
 						current_x += 1
@@ -266,7 +265,6 @@ func generate_random_graph():
 				else:
 					current_connection.append(Vector2i(current_x, current_y-1))
 					current_connection.append(Vector2i(current_x, current_y))
-					#current_connection.sort()
 					if !correct_vertical_edges.has(current_connection):
 						correct_vertical_edges.append([current_connection[0],current_connection[1]])
 						current_y -= 1
@@ -278,7 +276,6 @@ func generate_random_graph():
 				else:
 					current_connection.append(Vector2i(current_x, current_y))
 					current_connection.append(Vector2i(current_x, current_y+1))
-					#current_connection.sort()
 					if !correct_vertical_edges.has(current_connection):
 						correct_vertical_edges.append([current_connection[0],current_connection[1]])
 						current_y += 1
@@ -326,7 +323,6 @@ func generate_random_graph():
 						current_x -= 1
 						number_of_connections += 1
 						print("left_down")
-					
 			"left_up":
 				if (current_y-1)<0:
 					continue
@@ -355,10 +351,9 @@ func generate_random_graph():
 	print("horizontals: ", correct_horizontal_edges)
 	print("diagonals: ", correct_diagonal_edges)
 	print("nodes: ", correct_nodes)
-	
+
+## compares the connected edges to the correct edges and gives a count of the correctly placed edges
 func check_connectors():
-	connected_horizontal_edges.sort()
-	connected_vertical_edges.sort()
 	var vertical_edges_correct_count = 0
 	var horizontal_edges_correct_count = 0
 	var diagonal_edges_correct_count = 0
@@ -476,10 +471,12 @@ func _on_check_button_pressed():
 	var correct_nodes = check_nodes()
 	game_manager.update_label("correct edges", correct_connected_edges)
 	game_manager.update_label("correct nodes", correct_nodes)
-	# check win condition
+	# check win condition, total number of all connected edges must be equal to the number of correctly placed edges 
+	# TODO dit klopt nog niet, ook een tekort aan juist geplaatste edges is ok
 	if len(connected_horizontal_edges)+len(connected_vertical_edges)+len(connected_diagonal_edges) == correct_connected_edges:
-		win.emit()
-		game_won = true
+		if correct_connected_edges == len(correct_horizontal_edges)+len(correct_vertical_edges)+len(correct_diagonal_edges):
+			win.emit()
+			game_won = true
 
 func _on_clear_button_pressed():
 	if game_won:
